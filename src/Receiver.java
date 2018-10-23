@@ -8,10 +8,12 @@ public class Receiver implements Runnable{
     public void run() {
         try {
             ServerSocket server = new ServerSocket(Chat_Tree.getOwnPort());
-            System.out.println("Ready to receive messages");
-            Socket socket = server.accept();
-            System.out.println("Recieved message");
-            new Connection(socket);
+            while(true){
+                System.out.println("Ready to receive messages");
+                Socket socket = server.accept();
+                System.out.println("Received message");
+                new Connection(socket);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

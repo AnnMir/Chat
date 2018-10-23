@@ -1,8 +1,6 @@
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.time.LocalTime;
-import java.util.Map;
 
 public class Connection implements Runnable {
 
@@ -17,32 +15,26 @@ public class Connection implements Runnable {
     public void run() {
         try {
                 message = (Message)in.readObject();
+                System.out.println("message: "+message.getMessage()+"Type: "+message.getType());
                 Integer lost = Random();
+                System.out.println("lost:"+lost);
                 if(!(lost < Chat_Tree.getLossPercentage())){
                     if(message.getType().equals("User")){
                         System.out.println(message.getMessage());
-                        Sender temp = new Sender(message, RecAddress, RecPort);
-                        new Thread(temp).start();
-                        message.setType("System");
-                        out.writeObject(message);
-                        out.flush();
                     }
                     if(message.getType().equals("System")){
                         if(Chat_Tree.Control(message.getID())){
                             Chat_Tree.DeleteControl(message.getID());
                         }
+                    }else{
+                        message.setType("System");
+                        Sender temp = new Sender(message, RecAddress, RecPort);
+                        new Thread(temp).start();
+                        out.writeObject(message);
+                        out.flush();
                     }
                 }
                 Chat_Tree.getNeighbors().putIfAbsent(RecAddress,RecPort);
-                if(!Chat_Tree.getSendingControl().isEmpty()){
-                    for(Map.Entry<Message,Socket> tmp: Chat_Tree.getSendingControl().entrySet()){
-                        if(LocalTime.now().isAfter(tmp.getKey().getTime().plusSeconds(3))){
-                            Sender send = new Sender(tmp.getKey(),tmp.getValue());
-                            new Thread(send).start();
-                            System.out.println("Resending");
-                        }
-                    }
-                }
         }catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }

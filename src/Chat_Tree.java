@@ -37,11 +37,11 @@ public class Chat_Tree {
             Receiver receive = new Receiver();
             Ping ping = new Ping();
             Message msg = new Message("New member", "User");
-            Sender send = new Sender(msg);
+            Sender send = new Sender(msg,MyIP,OwnPort);
             new Thread(receive).start();
             new Thread(listen).start();
-            new Thread(ping).start();
             new Thread(send).start();
+            new Thread(ping).start();
         } catch (SocketException | UnknownHostException | PortException e) {
             e.printStackTrace();
         }

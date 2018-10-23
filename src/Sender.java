@@ -35,12 +35,12 @@ public class Sender implements Runnable{
         }
     }
 
-    Sender(Message msg){
+    /*Sender(Message msg){
         Message = msg;
         IP = null;
         Port = null;
         Status = "broadcasting";
-    }
+    }*/
 
     public Sender(Message msg, Socket _socket){
         Message = msg;
