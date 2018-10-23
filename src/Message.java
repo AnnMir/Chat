@@ -14,8 +14,8 @@ public class Message implements Serializable {
         this.message = msg;
         GUID guid = new GUID();
         this.ID = guid.getID();
-        this.IP = Chat_Tree.getMyIP();
-        this.Port = Chat_Tree.getOwnPort();
+        this.IP = Receiver.getMyIP();
+        this.Port = Receiver.getOwnPort();
         this.Type = type;
         this.Time = LocalTime.now();
     }

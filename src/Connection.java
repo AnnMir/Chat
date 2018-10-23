@@ -18,13 +18,13 @@ public class Connection implements Runnable {
                 System.out.println("message: "+message.getMessage()+"Type: "+message.getType());
                 Integer lost = Random();
                 System.out.println("lost:"+lost);
-                if(!(lost < Chat_Tree.getLossPercentage())){
+                if(!(lost < Receiver.getLossPercentage())){
                     if(message.getType().equals("User")){
                         System.out.println(message.getMessage());
                     }
                     if(message.getType().equals("System")){
-                        if(Chat_Tree.Control(message.getID())){
-                            Chat_Tree.DeleteControl(message.getID());
+                        if(Receiver.Control(message.getID())){
+                            Receiver.DeleteControl(message.getID());
                         }
                     }else{
                         message.setType("System");
@@ -34,7 +34,7 @@ public class Connection implements Runnable {
                         out.flush();
                     }
                 }
-                Chat_Tree.getNeighbors().putIfAbsent(RecAddress,RecPort);
+                Receiver.getNeighbors().putIfAbsent(RecAddress,RecPort);
         }catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }

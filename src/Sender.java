@@ -15,13 +15,13 @@ public class Sender implements Runnable{
     @Override
     public void run() {
         try {
-            if(!Chat_Tree.getNeighbors().isEmpty()) {
+            if(!Receiver.getNeighbors().isEmpty()) {
                 if (!Status.equals("resending")) {
-                    for (Map.Entry<InetAddress, Integer> tmp : Chat_Tree.getNeighbors().entrySet()) {
+                    for (Map.Entry<InetAddress, Integer> tmp : Receiver.getNeighbors().entrySet()) {
                         if (!tmp.getKey().equals(IP) && !tmp.getValue().equals(Port)) {
                             SendMsg(Message, tmp.getKey(), tmp.getValue());
-                            if(!Chat_Tree.Control(Message.getID()))
-                                Chat_Tree.setControl(Message,socket);
+                            if(!Receiver.Control(Message.getID()))
+                                Receiver.setControl(Message,socket);
                         }
                     }
                 }else {
