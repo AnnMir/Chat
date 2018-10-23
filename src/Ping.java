@@ -12,7 +12,7 @@ public class Ping implements Runnable{
                     Sender send = new Sender(msg);
                     new Thread(send).start();
                     System.out.println("Ping");
-                    Thread.sleep(3000);
+                    Thread.sleep(20000);
                     for (Map.Entry<InetAddress, Integer> temp : Chat_Tree.getNeighbors().entrySet()) {
                         if (Chat_Tree.Control(msg.getID())) {
                             System.out.println("Delete member");

@@ -10,6 +10,7 @@ public class Sender implements Runnable{
     private static Integer Port;
     private static Message Message;
     private static String Status;
+    private static Socket socket;
 
     @Override
     public void run() {
@@ -18,9 +19,9 @@ public class Sender implements Runnable{
                 if (!Status.equals("resending")) {
                     for (Map.Entry<InetAddress, Integer> tmp : Chat_Tree.getNeighbors().entrySet()) {
                         if (!tmp.getKey().equals(IP) && !tmp.getValue().equals(Port)) {
-                            Socket temp = SendMsg(Message, tmp.getKey(), tmp.getValue());
+                            SendMsg(Message, tmp.getKey(), tmp.getValue());
                             if(!Chat_Tree.Control(Message.getID()))
-                                Chat_Tree.setControl(Message,temp);
+                                Chat_Tree.setControl(Message,socket);
                         }
                     }
                 }else {
@@ -29,7 +30,7 @@ public class Sender implements Runnable{
             }
         } catch (IOException e) {
             System.out.println("User closed connection");
-            //e.printStackTrace();
+            e.printStackTrace();
 
         }
     }
@@ -41,10 +42,10 @@ public class Sender implements Runnable{
         Status = "broadcasting";
     }
 
-    public Sender(Message msg, Socket Socket){
+    public Sender(Message msg, Socket _socket){
         Message = msg;
-        IP = Socket.getInetAddress();
-        Port = Socket.getPort();
+        IP = _socket.getInetAddress();
+        Port = _socket.getPort();
         Status = "resending";
     }
 
@@ -55,11 +56,10 @@ public class Sender implements Runnable{
         Status = "transfer";
     }
 
-    private Socket SendMsg(Message msg, InetAddress IP, Integer port) throws IOException {
-        Socket temp = new Socket(IP, port);
-        ObjectOutputStream out = new ObjectOutputStream(temp.getOutputStream());
+    private void SendMsg(Message msg, InetAddress IP, Integer port) throws IOException {
+        socket = new Socket(IP, port);
+        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
         out.writeObject(msg);
         out.flush();
-        return temp;
     }
 }

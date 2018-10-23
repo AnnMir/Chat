@@ -37,7 +37,6 @@ public class Chat_Tree {
             Receiver receive = new Receiver();
             Ping ping = new Ping();
             Message msg = new Message("New member", "User");
-            System.out.println(msg.getMessage());
             Sender send = new Sender(msg);
             new Thread(receive).start();
             new Thread(listen).start();
