@@ -5,8 +5,8 @@ import java.time.LocalTime;
 public class Message implements Serializable {
     private String message;
     private String ID;
-    private InetAddress IP;
-    private Integer Port;
+    private InetAddress SenderIP;
+    private Integer SenderPort;
     private String Type;
     private LocalTime Time;
 
@@ -14,8 +14,8 @@ public class Message implements Serializable {
         this.message = msg;
         GUID guid = new GUID();
         this.ID = guid.getID();
-        this.IP = Receiver.getMyIP();
-        this.Port = Receiver.getOwnPort();
+        this.SenderIP = Receiver.getMyIP();
+        this.SenderPort = Receiver.getOwnPort();
         this.Type = type;
         this.Time = LocalTime.now();
     }
@@ -38,5 +38,13 @@ public class Message implements Serializable {
 
     public LocalTime getTime() {
         return Time;
+    }
+
+    public InetAddress getSenderIP() {
+        return SenderIP;
+    }
+
+    public Integer getSenderPort() {
+        return SenderPort;
     }
 }

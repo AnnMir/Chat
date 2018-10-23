@@ -1,6 +1,5 @@
 import javax.swing.*;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.io.IOException;
 
 public class Main {
     public static void main(String args[]){
@@ -20,11 +19,11 @@ public class Main {
             Listener listen = new Listener();
             Ping ping = new Ping();
             Message msg = new Message("New member", "User");
-            Sender send = new Sender(msg,Receiver.MyIP,Receiver.OwnPort);
+            Sender send = new Sender(msg);
             new Thread(listen).start();
             new Thread(send).start();
             new Thread(ping).start();
-        } catch (SocketException | UnknownHostException | PortException e) {
+        } catch (PortException | IOException e) {
             e.printStackTrace();
         }
     }

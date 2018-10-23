@@ -12,7 +12,7 @@ public class Listener implements Runnable {
                 System.out.println("Enter your message");
                 msg = userInput.readLine();
                 Message message = new Message(msg, "User");
-                Sender send = new Sender(message,Receiver.getMyIP(),Receiver.getOwnPort());
+                Sender send = new Sender(message);
                 new Thread(send).start();
             } catch (IOException e) {
                 e.printStackTrace();

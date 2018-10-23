@@ -28,13 +28,11 @@ public class Connection implements Runnable {
                         }
                     }else{
                         message.setType("System");
-                        Sender temp = new Sender(message, RecAddress, RecPort);
+                        Sender temp = new Sender(message, Socket);
                         new Thread(temp).start();
-                        out.writeObject(message);
-                        out.flush();
                     }
                 }
-                Receiver.getNeighbors().putIfAbsent(RecAddress,RecPort);
+                Receiver.setNeighbors(Socket);
         }catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }

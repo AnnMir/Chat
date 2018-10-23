@@ -1,11 +1,13 @@
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Receiver implements Runnable{
 
-    private static Map<InetAddress,Integer> Neighbors;
+    private static List<Socket> Neighbors;
     private static boolean ROOT;
     public static InetAddress MyIP;
     private static Integer LossPercentage;
@@ -19,7 +21,6 @@ public class Receiver implements Runnable{
     @Override
     public void run() {
         try {
-            Neighbors = new HashMap<>();
             ServerSocket server = new ServerSocket(OwnPort);
             while(true){
                 System.out.println("Ready to receive messages");
@@ -31,17 +32,18 @@ public class Receiver implements Runnable{
             e.printStackTrace();
         }
     }
-    public Receiver(String nodename, String lossPercentage, String port) throws PortException, UnknownHostException, SocketException {
+    public Receiver(String nodename, String lossPercentage, String port) throws PortException, UnknownHostException {
         MyIP = InetAddress.getByName(nodename);
         LossPercentage = Integer.valueOf(lossPercentage);
         OwnPort = Integer.valueOf(port);
         if(OwnPort < 1 || OwnPort > 65535){
             throw new PortException("Wrong number of the port");
         }
-        Neighbors = new HashMap<>();
+        Neighbors = new ArrayList<>();
+        SendingControl = new HashMap<>();
     }
 
-    public Receiver(String nodename, String lossPercentage, String port, String parentPort, String parentIP) throws PortException, UnknownHostException, SocketException {
+    public Receiver(String nodename, String lossPercentage, String port, String parentPort, String parentIP) throws PortException, IOException {
         MyIP = InetAddress.getByName(nodename);
         LossPercentage = Integer.valueOf(lossPercentage);
         OwnPort = Integer.valueOf(port);
@@ -50,28 +52,23 @@ public class Receiver implements Runnable{
         if(OwnPort < 1 || OwnPort > 65535 || ParentPort < 1 || ParentPort > 65535){
             throw new PortException("Wrong number of the port");
         }
-        Neighbors = new HashMap<>();
-        setNeighbors(ParentIP, ParentPort);
+        Neighbors = new ArrayList<>();
+        Socket socket = new Socket(ParentIP,ParentPort);
+        setNeighbors(socket);
+        SendingControl = new HashMap<>();
     }
 
-    private static void setROOT(boolean _ROOT) {
-        ROOT = _ROOT;
+    public static void setNeighbors(Socket socket) {
+        if(!Neighbors.contains(socket))
+        Neighbors.add(socket);
     }
 
-    public static boolean getROOT(){
-        return ROOT;
-    }
-
-    private static void setNeighbors(InetAddress IP, Integer port) {
-        Neighbors.put(IP, port);
-    }
-
-    public static Map<InetAddress, Integer> getNeighbors() {
+    public static List<Socket> getNeighbors() {
         return Neighbors;
     }
 
-    public static void DeleteNeighbor(InetAddress IP, Integer port){
-        Neighbors.remove(IP, port);
+    public static void DeleteNeighbor(Socket socket){
+        Neighbors.remove(socket);
     }
 
     public static Integer getLossPercentage() {
@@ -95,9 +92,11 @@ public class Receiver implements Runnable{
     }
 
     public static boolean Control(String id){
-        for(Map.Entry<Message,Socket> tmp: getSendingControl().entrySet()){
-            if(tmp.getKey().getID().equals(id))
-                return true;
+        if(!SendingControl.isEmpty()){
+            for(Map.Entry<Message,Socket> tmp: getSendingControl().entrySet()){
+                if(tmp.getKey().getID().equals(id))
+                    return true;
+            }
         }
         return false;
     }
