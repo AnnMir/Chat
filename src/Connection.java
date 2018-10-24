@@ -1,22 +1,18 @@
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.Socket;
 
 public class Connection implements Runnable {
 
-    private static DatagramSocket Socket;
-    private static InetAddress RecAddress;
-    private static Integer RecPort;
-    private static String message;
-    private static DatagramPacket packet;
+    private DatagramSocket Socket;
+    private DatagramPacket packet;
 
     @Override
     public void run() {
         try {
             read();
-            message = new String(packet.getData(),0,packet.getLength());
+            String message = new String(packet.getData(), 0, packet.getLength());
             Message msg = new Message(message);
             System.out.println(msg.getMessage(message));
             Integer lost = Random();
@@ -48,18 +44,16 @@ public class Connection implements Runnable {
             Socket = sd;
             Main.setNeighbors(Socket);
         }else{
-            for(int i=0;i<Main.getNeighbors().size();i++){
-                if(Main.getNeighbors().get(i).equals(sd)){
-                    Socket = Main.getNeighbors().get(i);
+            for(DatagramSocket sp: Main.getNeighbors()){
+                if(sp.equals(sd)){
+                    Socket = sp;
                 }
             }
         }
-        RecAddress = Socket.getInetAddress();
-        RecPort = Socket.getPort();
         this.run();
     }
 
-    public void read() throws IOException {
+    private void read() throws IOException {
         if(!Socket.isClosed()){
             byte[] buf = new byte[2000000];
             packet = new DatagramPacket(buf,buf.length);

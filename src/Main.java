@@ -2,16 +2,15 @@ import javax.swing.*;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 
 public class Main {
 
-    private static List<DatagramSocket> Neighbors;
-    public static InetAddress MyIP;
+    private static BlockingDeque<DatagramSocket> Neighbors;
+    private static InetAddress MyIP;
     private static Integer LossPercentage;
     public static Integer MyPort;
 
@@ -29,7 +28,7 @@ public class Main {
             MyIP = InetAddress.getByName(args[0]);
             LossPercentage = Integer.valueOf(args[1]);
             MyPort = Integer.valueOf(args[2]);
-            Neighbors = new ArrayList<>();
+            Neighbors = new LinkedBlockingDeque<>();
             SendingControl = new HashMap<>();
             if(MyPort < 1 || MyPort > 65535){
                 throw new PortException("Wrong number of port");
@@ -65,7 +64,7 @@ public class Main {
         if(!Neighbors.contains(socket))
             Neighbors.add(socket);
     }
-    public static List<DatagramSocket> getNeighbors() {
+    public static BlockingDeque<DatagramSocket> getNeighbors() {
         return Neighbors;
     }
 
@@ -75,10 +74,6 @@ public class Main {
 
     public static Integer getLossPercentage() {
         return LossPercentage;
-    }
-
-    public static Integer getOwnPort() {
-        return MyPort;
     }
 
     public static InetAddress getMyIP() {

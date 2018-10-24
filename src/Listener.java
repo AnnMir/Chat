@@ -6,7 +6,7 @@ public class Listener implements Runnable {
     @Override
     public void run() {
         BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
-        String msg = null;
+        String msg;
         while (true) {
             try {
                 System.out.println("Enter your message");

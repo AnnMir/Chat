@@ -5,21 +5,20 @@ import java.util.Map;
 public class Message {
     private String message;
 
-    public Message(String msg, String Type){
+    Message(String msg, String Type){
         GUID guid = new GUID();
         message = guid.getID()+" "+Type+" "+ LocalTime.now().toString()+" "+msg;
     }
 
-    public Message(String msg){
+    Message(String msg){
         message = msg;
     }
 
-    public Message(){}
+    Message(){}
 
     public String getMessage(String msg) {
         String[] tmp = msg.split(" ");
-        msg.replaceFirst(tmp[0]+" "+tmp[1]+" "+tmp[2]+" ","");
-        return msg;
+        return msg.replaceFirst(tmp[0]+" "+tmp[1]+" "+tmp[2]+" ","");
     }
     public String getMessage(){
         return message;
@@ -30,14 +29,14 @@ public class Message {
         return tmp[0];
     }
 
-    public String getMessage(Message msg){
+    String getMessage(Message msg){
             return getMessage(msg.getMessage());
     }
 
     public boolean Control(Message msg,String id){
         if(!Main.SendingControl.isEmpty()){
             for(Map.Entry<Message,DatagramSocket> tmp: Main.getSendingControl().entrySet()){
-                if(getID(msg.getMessage()).equals(id))
+                if(tmp.getKey().getID(msg.getMessage()).equals(id))
                     return true;
             }
         }
@@ -46,13 +45,13 @@ public class Message {
 
     public void DeleteControl(Message msg, String id){
         for(Map.Entry<Message,DatagramSocket> tmp: Main.getSendingControl().entrySet()){
-            if(getID(msg.getMessage()).equals(id)){
+            if(tmp.getKey().getID(msg.getMessage()).equals(id)){
                 Main.getSendingControl().remove(tmp.getKey(),tmp.getValue());
             }
         }
     }
 
-    public static void setControl(Message msg, DatagramSocket socket){
+    static void setControl(Message msg, DatagramSocket socket){
         Main.getSendingControl().put(msg,socket);
     }
 
