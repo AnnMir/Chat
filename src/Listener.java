@@ -11,7 +11,7 @@ public class Listener implements Runnable {
             try {
                 System.out.println("Enter your message");
                 msg = userInput.readLine();
-                Sender send = new Sender(msg);
+                Sender send = new Sender(msg,"User");
                 new Thread(send).start();
             } catch (IOException e) {
                 e.printStackTrace();

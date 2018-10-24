@@ -14,6 +14,8 @@ public class Message {
         message = msg;
     }
 
+    public Message(){}
+
     public String getMessage(String msg) {
         String[] tmp = msg.split(" ");
         msg.replaceFirst(tmp[0]+" "+tmp[1]+" "+tmp[2]+" ","");

@@ -46,7 +46,7 @@ public class Main {
             Ping ping = new Ping();
             Receiver receive = new Receiver();
             if(!getNeighbors().isEmpty()){
-                Sender send = new Sender("Hello");
+                Sender send = new Sender("Hello","User");
                 new Thread(send).start();
             }
             new Thread(listen).start();

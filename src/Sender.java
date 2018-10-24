@@ -40,8 +40,11 @@ public class Sender extends Message implements Runnable {
         socket = _socket;
     }
 
-    public Sender(String msg){
-        super(msg,"User");
+    public Sender(String msg,String Type){
+        super(msg,Type);
+        Status = "";
+    }
+    public Sender(Message msg){
         Status = "";
     }
 
