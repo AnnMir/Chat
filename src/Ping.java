@@ -8,16 +8,18 @@ public class Ping implements Runnable{
 
     @Override
     public void run() {
-        while(true){
+        /*while(true){
             try {
                 if(!Receiver.getNeighbors().isEmpty()) {
-                    Message msg = new Message("Ping", "Ping");
+                    GUID guid = new GUID();
+                    String msg = guid.getID()+" "+"Ping"+" "+"Ping";
+                    Message msg
                     Sender send = new Sender(msg);
                     System.out.println(Receiver.getMyIP());
                     new Thread(send).start();
                     System.out.println("Ping");
                     Thread.sleep(5000);
-                    if (Receiver.Control(msg.getID()) && LocalTime.now().isAfter(msg.getTime().plusSeconds(30000))) {
+                    if (Main.Control(.getID(msg)) && LocalTime.now().isAfter(msg.getTime().plusSeconds(30000))) {
                         System.out.println("Delete member");
                         Receiver.DeleteNeighbor(Receiver.getSendingControl().get(msg));
                     }
@@ -35,6 +37,6 @@ public class Ping implements Runnable{
                 } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
     }
 }

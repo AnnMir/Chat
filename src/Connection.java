@@ -1,52 +1,70 @@
 import java.io.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
 
 public class Connection implements Runnable {
 
-    private static Socket Socket;
-    private static ObjectInputStream in;
-    private static ObjectOutputStream out;
+    private static DatagramSocket Socket;
     private static InetAddress RecAddress;
     private static Integer RecPort;
-    private static Message message;
+    private static String message;
+    private static DatagramPacket packet;
 
     @Override
     public void run() {
         try {
-                message = (Message)in.readObject();
-                System.out.println("message: "+message.getMessage()+"Type: "+message.getType());
-                Integer lost = Random();
-                System.out.println("lost:"+lost);
-                if(!(lost < Receiver.getLossPercentage())){
-                    if(message.getType().equals("User")){
-                        System.out.println(message.getMessage());
-                    }
-                    if(message.getType().equals("System")){
-                        if(Receiver.Control(message.getID())){
-                            Receiver.DeleteControl(message.getID());
-                        }
-                    }else{
-                        message.setType("System");
-                        Sender temp = new Sender(message, Socket);
-                        new Thread(temp).start();
-                    }
+            read();
+            message = new String(packet.getData(),0,packet.getLength());
+            Message msg = new Message(message);
+            System.out.println(msg.getMessage(message));
+            Integer lost = Random();
+            System.out.println("lost:"+lost);
+            if(!(lost < Main.getLossPercentage())){
+                if(msg.getType(message).equals("User")){
+                    System.out.println(msg.getMessage(message));
                 }
-                Receiver.setNeighbors(Socket);
-        }catch (IOException | ClassNotFoundException e) {
+                if(msg.getType(message).equals("System")){
+                    if(msg.Control(msg,msg.getID(message))){
+                        msg.DeleteControl(msg, msg.getID(message));
+                    }
+                }else{
+                    message = msg.setType(message,"System");
+                    Sender temp = new Sender(message, Socket);
+                    new Thread(temp).start();
+                }
+            }
+
+
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     Connection(Socket _socket) throws IOException{
-            Socket = _socket;
-            in = new ObjectInputStream(Socket.getInputStream());
-            out = new ObjectOutputStream(Socket.getOutputStream());
-            RecAddress = Socket.getInetAddress();
-            RecPort = Socket.getPort();
-            this.run();
+        DatagramSocket sd = new DatagramSocket(_socket.getPort(),_socket.getInetAddress());
+        if(!Main.getNeighbors().contains(sd)){
+            Socket = sd;
+            Main.setNeighbors(Socket);
+        }else{
+            for(int i=0;i<Main.getNeighbors().size();i++){
+                if(Main.getNeighbors().get(i).equals(sd)){
+                    Socket = Main.getNeighbors().get(i);
+                }
+            }
+        }
+        RecAddress = Socket.getInetAddress();
+        RecPort = Socket.getPort();
+        this.run();
+    }
 
-
+    public void read() throws IOException {
+        if(!Socket.isClosed()){
+            byte[] buf = new byte[2000000];
+            packet = new DatagramPacket(buf,buf.length);
+            Socket.receive(packet);
+        }
     }
 
     private int Random(){

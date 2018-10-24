@@ -1,30 +1,93 @@
 import javax.swing.*;
 import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Main {
+
+    private static List<DatagramSocket> Neighbors;
+    public static InetAddress MyIP;
+    private static Integer LossPercentage;
+    public static Integer MyPort;
+
+
+    private static Integer ParentPort;
+    private static InetAddress ParentIP;
+    public static Map<Message,DatagramSocket> SendingControl;
+
     public static void main(String args[]){
         try {
             if (args.length != 3 && args.length != 5) {
                 JOptionPane.showMessageDialog(null, "Wrong arguments");
                 return;
             }
-            if (args.length == 3) {
-                Receiver receive = new Receiver(args[0], args[1], args[2]);
-                new Thread(receive).start();
+            MyIP = InetAddress.getByName(args[0]);
+            LossPercentage = Integer.valueOf(args[1]);
+            MyPort = Integer.valueOf(args[2]);
+            Neighbors = new ArrayList<>();
+            SendingControl = new HashMap<>();
+            if(MyPort < 1 || MyPort > 65535){
+                throw new PortException("Wrong number of port");
             }
             if (args.length == 5) {
-                Receiver receive = new Receiver(args[0], args[1], args[2], args[3], args[4]);
-                new Thread(receive).start();
+                ParentPort = Integer.valueOf(args[3]);
+                ParentIP = InetAddress.getByName(args[4]);
+                if(ParentPort < 1 || ParentPort > 65535)
+                    throw new PortException("Wrong number of parent port");
+                DatagramSocket socket = new DatagramSocket(ParentPort,ParentIP);
+                setNeighbors(socket);
             }
             Listener listen = new Listener();
             Ping ping = new Ping();
-            Message msg = new Message("New member", "User");
-            Sender send = new Sender(msg);
+            Receiver receive = new Receiver();
+            if(!getNeighbors().isEmpty()){
+                Sender send = new Sender("Hello");
+                new Thread(send).start();
+            }
             new Thread(listen).start();
-            new Thread(send).start();
             new Thread(ping).start();
+            new Thread(receive).start();
         } catch (PortException | IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static Map<Message, DatagramSocket> getSendingControl() {
+        return SendingControl;
+    }
+
+    public static void setNeighbors(DatagramSocket socket) {
+        if(!Neighbors.contains(socket))
+            Neighbors.add(socket);
+    }
+    public static List<DatagramSocket> getNeighbors() {
+        return Neighbors;
+    }
+
+    public static void DeleteNeighbor(DatagramSocket socket){
+        Neighbors.remove(socket);
+    }
+
+    public static Integer getLossPercentage() {
+        return LossPercentage;
+    }
+
+    public static Integer getOwnPort() {
+        return MyPort;
+    }
+
+    public static InetAddress getMyIP() {
+        return MyIP;
+    }
+}
+
+class PortException extends Exception{
+    PortException(String message){
+        super(message);
     }
 }

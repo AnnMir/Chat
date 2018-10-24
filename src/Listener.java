@@ -11,13 +11,11 @@ public class Listener implements Runnable {
             try {
                 System.out.println("Enter your message");
                 msg = userInput.readLine();
-                Message message = new Message(msg, "User");
-                Sender send = new Sender(message);
+                Sender send = new Sender(msg);
                 new Thread(send).start();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
     }
 }

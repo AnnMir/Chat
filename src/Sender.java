@@ -1,30 +1,30 @@
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.*;
 
 
-public class Sender implements Runnable{
+public class Sender extends Message implements Runnable {
 
-    private static Message Message;
-    private static String Status;
-    private static Socket socket;
+    private Message message;
+    private String Status;
+    private DatagramSocket socket;
+    private DatagramPacket packet;
 
     @Override
     public void run() {
         try {
-            if(!Receiver.getNeighbors().isEmpty()) {
+            if(!Main.getNeighbors().isEmpty()) {
                 if (!Status.equals("resending")) {
-                    for (int i=0;i<Receiver.getNeighbors().size();i++) {
-                        if (!(Receiver.getNeighbors().get(i).getInetAddress().equals(Message.getSenderIP()))){
-                            if(Receiver.getNeighbors().get(i).getPort() != Message.getSenderPort()){
-                                SendMsg(Message, Receiver.getNeighbors().get(i));
-                                if(!Receiver.Control(Message.getID()))
-                                    Receiver.setControl(Message,socket);
-                                }
+                    for (int i=0;i<Main.getNeighbors().size();i++) {
+                        if (!(Main.getNeighbors().get(i).getInetAddress().equals(socket.getInetAddress()))){
+                            if(Main.getNeighbors().get(i).getPort() != socket.getPort()){
+                                SendMsg(getMessage(message), socket);
+                                if(!Control(message,getID(message.getMessage())));
+                                    setControl(message,socket);
                             }
                         }
-                    }else {
-                    SendMsg(Message, socket);
+                    }
+                }else {
+                    SendMsg(getMessage(message), socket);
                 }
             }
         } catch (IOException e) {
@@ -34,20 +34,21 @@ public class Sender implements Runnable{
         }
     }
 
-    public Sender(Message msg, Socket _socket){
-        Message = msg;
+    public Sender(String msg,DatagramSocket _socket){
+        super(msg,"User");
         Status = "resending";
         socket = _socket;
     }
 
-    public Sender(Message msg){
-        Message = msg;
+    public Sender(String msg){
+        super(msg,"User");
         Status = "";
     }
 
-    private void SendMsg(Message msg, Socket socket) throws IOException {
-        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-        out.writeObject(msg);
-        out.flush();
+    private void SendMsg(String msg, DatagramSocket socket) throws IOException {
+        if(!socket.isClosed()){
+            packet = new DatagramPacket(msg.getBytes(),msg.length(),new InetSocketAddress(socket.getInetAddress(),socket.getPort()));
+            socket.send(packet);
+        }
     }
 }

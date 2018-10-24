@@ -1,50 +1,71 @@
-import java.io.Serializable;
-import java.net.InetAddress;
+import java.net.DatagramSocket;
 import java.time.LocalTime;
+import java.util.Map;
 
-public class Message implements Serializable {
+public class Message {
     private String message;
-    private String ID;
-    private InetAddress SenderIP;
-    private Integer SenderPort;
-    private String Type;
-    private LocalTime Time;
 
-    public Message(String msg, String type){
-        this.message = msg;
+    public Message(String msg, String Type){
         GUID guid = new GUID();
-        this.ID = guid.getID();
-        this.SenderIP = Receiver.getMyIP();
-        this.SenderPort = Receiver.getOwnPort();
-        this.Type = type;
-        this.Time = LocalTime.now();
+        message = guid.getID()+" "+Type+" "+ LocalTime.now().toString()+" "+msg;
     }
 
-    public String getMessage() {
-        return this.message;
+    public Message(String msg){
+        message = msg;
     }
 
-    public String getType() {
-        return this.Type;
+    public String getMessage(String msg) {
+        String[] tmp = msg.split(" ");
+        msg.replaceFirst(tmp[0]+" "+tmp[1]+" "+tmp[2]+" ","");
+        return msg;
+    }
+    public String getMessage(){
+        return message;
     }
 
-    public void setType(String type) {
-        this.Type = type;
+    public String getID(String msg){
+        String[] tmp = msg.split(" ");
+        return tmp[0];
     }
 
-    public String getID() {
-        return this.ID;
+    public String getMessage(Message msg){
+            return getMessage(msg.getMessage());
     }
 
-    public LocalTime getTime() {
-        return Time;
+    public boolean Control(Message msg,String id){
+        if(!Main.SendingControl.isEmpty()){
+            for(Map.Entry<Message,DatagramSocket> tmp: Main.getSendingControl().entrySet()){
+                if(getID(msg.getMessage()).equals(id))
+                    return true;
+            }
+        }
+        return false;
     }
 
-    public InetAddress getSenderIP() {
-        return SenderIP;
+    public void DeleteControl(Message msg, String id){
+        for(Map.Entry<Message,DatagramSocket> tmp: Main.getSendingControl().entrySet()){
+            if(getID(msg.getMessage()).equals(id)){
+                Main.getSendingControl().remove(tmp.getKey(),tmp.getValue());
+            }
+        }
     }
 
-    public Integer getSenderPort() {
-        return SenderPort;
+    public static void setControl(Message msg, DatagramSocket socket){
+        Main.getSendingControl().put(msg,socket);
+    }
+
+    public String getType(String msg){
+        String[] tmp = msg.split(" ");
+        return tmp[1];
+    }
+
+    public String setType(String msg, String type){
+        String[] tmp = msg.split(" ");
+        tmp[1] = type;
+        return msg.replaceFirst(tmp[1],type);
+    }
+    public LocalTime getTime(String msg){
+        String[] tmp = msg.split(" ");
+        return LocalTime.parse(tmp[2]);
     }
 }
