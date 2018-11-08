@@ -17,10 +17,9 @@ public class Listener implements Runnable {
         String msg;
         while (true) {
             try {
-                //System.out.println("Enter your message");
                 msg = userInput.readLine();
                 if(!"".equals(msg)) {
-                    mySender.putMessageToQueue(null, Constants.MESSAGE_HEADER,msg,null,null);
+                    mySender.putMessageToQueue(null, "message",msg,null,null);
                     System.out.println(mySender.getMyName()+": "+msg);
                 }
             } catch (IOException e) {

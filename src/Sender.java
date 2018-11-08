@@ -11,27 +11,27 @@ public class Sender implements Runnable{
     private DatagramSocket myDatagramSocket;
     private Set<String> neighboursList;
     private String myName;
-    private LinkedBlockingQueue<Message> toSendQueue;
+    private LinkedBlockingQueue<Message> SendingQueue;
     private ConcurrentHashMap<String, ConfirmerData> myUnconfirmed;
 
     //конструктор для рута
-    public Sender(String ip, DatagramSocket datagramSocket,ConcurrentHashMap<String , ConfirmerData> unconfirmed
+    Sender(String ip, DatagramSocket datagramSocket,ConcurrentHashMap<String , ConfirmerData> unconfirmed
             ,Set<String> neighbours){
         myName =ip;
         myDatagramSocket=datagramSocket;
-        toSendQueue=new LinkedBlockingQueue<>();
+        SendingQueue=new LinkedBlockingQueue<>();
         myUnconfirmed =unconfirmed;
         neighboursList=neighbours;
     }
 
     //констурктор для потомков
-    public Sender(String ip,DatagramSocket datagramSocket,InetAddress parentIp,int parentPort
+    Sender(String ip,DatagramSocket datagramSocket,InetAddress parentIp,int parentPort
             ,ConcurrentHashMap<String, ConfirmerData> unconfirmed,Set<String> neighbours){
         myName = ip;
         myDatagramSocket=datagramSocket;
         neighboursList=neighbours;
         neighboursList.add(parentIp.getHostAddress()+":"+parentPort);
-        toSendQueue=new LinkedBlockingQueue<>();
+        SendingQueue=new LinkedBlockingQueue<>();
         myUnconfirmed =unconfirmed;
         sendHello();
     }
@@ -40,7 +40,7 @@ public class Sender implements Runnable{
     public void run() {
         try {
             while (true) {
-                Message ms = toSendQueue.take();
+                Message ms = SendingQueue.take();
                 sendMessage(ms);
             }
         }
@@ -53,13 +53,13 @@ public class Sender implements Runnable{
     void putMessageToQueue(String uuid, String head, String msg, String senderName, String previousSender){
         Message message;
         if(uuid==null || senderName==null ) {
-            message = new Message(UUID.randomUUID().toString(), Constants.MESSAGE_HEADER, msg, myName, null);
+            message = new Message(UUID.randomUUID().toString(), "message", msg, myName, null);
         }
         else {
             message = new Message(uuid, head, msg, senderName, previousSender);
         }
         try {
-            toSendQueue.put(message);
+            SendingQueue.put(message);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -68,8 +68,6 @@ public class Sender implements Runnable{
     //рассылка сообщения всем соседям кроме предыдущего отправителя
     private void sendMessage(Message message){
         try {
-            String neighbourIp;
-            String neighbourPort;
             Set<String> myReceivers=ConcurrentHashMap.newKeySet();
             myReceivers.addAll(neighboursList);
 
@@ -97,7 +95,7 @@ public class Sender implements Runnable{
 
     //отправка уведомительного сообщения родителю
     private void sendHello(){
-        putMessageToQueue(UUID.randomUUID().toString(), Constants.CHILD_HEADER,"", myName,myName);
+        putMessageToQueue(UUID.randomUUID().toString(), "hello","", myName,myName);
     }
 
     String getMyName(){

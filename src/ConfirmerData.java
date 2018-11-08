@@ -6,7 +6,7 @@ public class ConfirmerData{
     private int resendingCounter;
     private String prevSender;
 
-    public ConfirmerData(String data, Set<String> neighbours,String prev)
+    ConfirmerData(String data, Set<String> neighbours,String prev)
     {
         this.prevSender=prev;
         this.data = data;

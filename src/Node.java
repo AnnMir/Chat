@@ -14,15 +14,16 @@ public class Node {
     private int myPercentLost;
     private boolean isRoot;
     private DatagramSocket myDatagramSocket;
+    private static final int RESENDING_PERIOD = 3000;
 
-    public Node(String name,int percentLost, int port){
+    Node(String name,int percentLost, int port){
         myName =name;
         myPort=port;
         myPercentLost=percentLost;
         isRoot=true;
     }
 
-    public Node(String name,int percentLost, int port, InetAddress parentIp,int parentPort){
+    Node(String name,int percentLost, int port, InetAddress parentIp,int parentPort){
         myName =name;
         myPort=port;
         myPercentLost=percentLost;
@@ -34,7 +35,6 @@ public class Node {
     public void nodeCreate(){
         Sender mySender;
         Receiver myReceiver;
-        Listener myListener;
         Confirmer myConfirmer;
         ConcurrentHashMap<String, ConfirmerData> unconfirmed=new ConcurrentHashMap<>();
         ConcurrentHashMap<String, Date> recentReceived=new ConcurrentHashMap<>();
@@ -59,7 +59,7 @@ public class Node {
 
         new Thread(mySender).start();
         new Thread(myReceiver).start();
-        new Timer().schedule(myConfirmer,1000,Constants.RESENDING_PERIOD);
-        myListener=new Listener(mySender);
+        new Timer().schedule(myConfirmer,1000,RESENDING_PERIOD);
+        new Listener(mySender);
     }
 }

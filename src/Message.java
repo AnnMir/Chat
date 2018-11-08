@@ -1,3 +1,4 @@
+
 public class Message {
     private String uuid;
     private String header;
@@ -5,7 +6,7 @@ public class Message {
     private String senderName;
     private String nameFrom;
 
-    public Message(String uuid,String head, String message,String name,String from) {
+    Message(String uuid,String head, String message,String name,String from) {
         this.uuid = uuid;
         this.header=head;
         this.message = message;

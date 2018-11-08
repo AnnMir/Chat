@@ -11,8 +11,9 @@ public class Confirmer extends TimerTask
     private Set<String> myNeighbours;
     private ConcurrentHashMap<String, Date> myRecentReceived;
     private DatagramSocket myDatagramSocket;
+    private static final int RESENDING_PERIOD = 3000;
 
-    public Confirmer(DatagramSocket datagramSocket, ConcurrentHashMap<String, ConfirmerData> unconfirmed
+    Confirmer(DatagramSocket datagramSocket, ConcurrentHashMap<String, ConfirmerData> unconfirmed
             ,ConcurrentHashMap<String, Date> recentReceived,Set<String> neighbours){
         myDatagramSocket=datagramSocket;
         myNeighbours= neighbours;
@@ -47,8 +48,8 @@ public class Confirmer extends TimerTask
                     e.printStackTrace();
                 }
             }
-            //если число попыток равно 10, удаляем кто не подтвердил из соседей
-            if (entry.getValue().getResendingCounter() == Constants.NUMBER_OF_TRIES)
+            //если число попыток равно 20, удаляем кто не подтвердил из соседей
+            if (entry.getValue().getResendingCounter() == 20)
             {
                 neighbours=entry.getValue().getMyNeighbours();
                 for (String address : neighbours) {
@@ -62,7 +63,7 @@ public class Confirmer extends TimerTask
         Date now = new Date();
         for (Map.Entry<String, Date> entry : myRecentReceived.entrySet())
         {
-            if(now.compareTo(entry.getValue()) > Constants.RESENDING_PERIOD * Constants.NUMBER_OF_TRIES)
+            if(now.compareTo(entry.getValue()) > (RESENDING_PERIOD * 20))
                 myRecentReceived.remove(entry.getKey());
         }
     }

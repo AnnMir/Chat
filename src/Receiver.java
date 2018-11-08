@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
@@ -15,9 +16,8 @@ public class Receiver implements Runnable {
     private ConcurrentHashMap<String, Date> myRecentReceived;
     private ConcurrentHashMap<String, ConfirmerData> myUnconfirmed;
     private Sender mySender;
-    private Listener myListener;
 
-    public Receiver(String name,DatagramSocket datagramSocket,int percentLost,Set<String> neighbours
+    Receiver(String name,DatagramSocket datagramSocket,int percentLost,Set<String> neighbours
             , ConcurrentHashMap<String, Date> recentReceived
             , ConcurrentHashMap<String, ConfirmerData> unconfirmed, Sender sender){
         myPercentLost=percentLost;
@@ -27,6 +27,21 @@ public class Receiver implements Runnable {
         myUnconfirmed =unconfirmed;
         myNeighbours=neighbours;
         mySender=sender;
+    }
+
+    @Override
+    public void run() {
+        while(true) {
+            //считываем наш пакет в буфер
+            byte[] buffer = new byte[4096];
+            DatagramPacket myDatagramPacket = new DatagramPacket(buffer, 4096);
+            try {
+                myDatagramSocket.receive(myDatagramPacket);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            receive(myDatagramPacket);
+        }
     }
 
     private void receive(DatagramPacket myDatagramPacket){
@@ -46,14 +61,14 @@ public class Receiver implements Runnable {
         int senderPort = myDatagramPacket.getPort();
         String fullSenderAddress=senderAddress+":"+senderPort;
 
-        if(numberOfStrings> Constants.MIN_SIZE_PACKET){
+        if(numberOfStrings> 3){
             //определеяем uuid собщения, header и его владельца
             String uuid=messageStrings[0];
             String messageHeader=messageStrings[1];
             String senderName=messageStrings[2];
             //определяем тип сообщения
             switch (messageHeader){
-                case Constants.CHILD_HEADER:{
+                case "hello":{
                     //получем текущий список соседей
                     if(!myNeighbours.contains(fullSenderAddress)){
                         myNeighbours.add(fullSenderAddress);
@@ -62,24 +77,23 @@ public class Receiver implements Runnable {
                     }
                     break;
                 }
-                case Constants.MESSAGE_HEADER:{
+                case "message":{
                     if(myRecentReceived.get(uuid) == null) {
                         myRecentReceived.putIfAbsent(uuid,new Date());
                         //кладем полученное сообщение в очерель сообщений
-                        mySender.putMessageToQueue(uuid, Constants.MESSAGE_HEADER, messageStrings[3], senderName, fullSenderAddress);
+                        mySender.putMessageToQueue(uuid, "message", messageStrings[3], senderName, fullSenderAddress);
 
-                        //передаем строки для отображения в UI
                         System.out.println(senderName+": " +messageStrings[3]);
                         sendConfirmation(uuid, fullSenderAddress);
                     }
                     break;
                 }
-                case Constants.CONFIRMATION_HEADER:{
+                case "confirmation":{
                     myUnconfirmed.get(messageStrings[3]).confirm(fullSenderAddress);
                     break;
                 }
                 default:{
-                    System.out.println("Something wrong in receiving");
+                    JOptionPane.showMessageDialog(null, "Undefined message");
                 }
             }
         }
@@ -88,7 +102,7 @@ public class Receiver implements Runnable {
 
     private void sendConfirmation(String uuid, String fullReceiverAddress)
     {
-        Message myMessage=new Message(UUID.randomUUID().toString(), Constants.CONFIRMATION_HEADER,uuid, myName,null);
+        Message myMessage=new Message(UUID.randomUUID().toString(), "confirmation",uuid, myName,null);
         byte[] buffer = myMessage.toString().getBytes();
         String[] receiverStringsAddress = fullReceiverAddress.split(":");
         InetSocketAddress receiverAddress = new InetSocketAddress(receiverStringsAddress[0], Integer.parseInt(receiverStringsAddress[1]));
@@ -100,20 +114,7 @@ public class Receiver implements Runnable {
         }
     }
 
-    @Override
-    public void run() {
-        while(true) {
-            //считываем наш пакет в буфер
-            byte[] buffer = new byte[4096];
-            DatagramPacket myDatagramPacket = new DatagramPacket(buffer, 4096);
-            try {
-                myDatagramSocket.receive(myDatagramPacket);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            receive(myDatagramPacket);
-        }
-    }
+
 
 
     private String[] decode(byte[] encodedArray) {
