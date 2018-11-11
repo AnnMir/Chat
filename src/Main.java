@@ -25,9 +25,6 @@ public class Main {
                 e.printStackTrace();
             }
         }
-        else{
-            JOptionPane.showMessageDialog(null, "Wrong arguments");
-            return;
-        }
+        else JOptionPane.showMessageDialog(null, "Wrong arguments");
     }
 }

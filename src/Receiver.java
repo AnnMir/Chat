@@ -1,4 +1,6 @@
-import javax.swing.*;
+ import org.jetbrains.annotations.NotNull;
+
+ import javax.swing.*;
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
@@ -44,13 +46,7 @@ public class Receiver implements Runnable {
         }
     }
 
-    private void receive(DatagramPacket myDatagramPacket){
-        //имитируем потерю пакета
-        int randomPercentLost = new Random().nextInt(100);
-        if (randomPercentLost < myPercentLost ) {
-            return;
-        }
-
+    private void receive(@NotNull DatagramPacket myDatagramPacket){
         //декодируем байты в массив строк и определяем количество
         byte[] fullData = myDatagramPacket.getData();
         String[] messageStrings = decode (fullData);
@@ -60,6 +56,13 @@ public class Receiver implements Runnable {
         String senderAddress = myDatagramPacket.getAddress().getHostAddress();
         int senderPort = myDatagramPacket.getPort();
         String fullSenderAddress=senderAddress+":"+senderPort;
+
+        //имитируем потерю пакета
+        int randomPercentLost = new Random().nextInt(100);
+        if (randomPercentLost < myPercentLost ) {
+            System.out.println("Lost message "+messageStrings[0]+" from "+fullSenderAddress);
+            return;
+        }
 
         if(numberOfStrings> 3){
             //определеяем uuid собщения, header и его владельца
@@ -72,20 +75,24 @@ public class Receiver implements Runnable {
                     //получем текущий список соседей
                     if(!myNeighbours.contains(fullSenderAddress)){
                         myNeighbours.add(fullSenderAddress);
-                        sendConfirmation(uuid,fullSenderAddress);
                         System.out.println(myName+": "+senderName + " " + fullSenderAddress + " connects.");
                     }
+                    sendConfirmation(uuid,fullSenderAddress);
                     break;
                 }
                 case "message":{
+                    if(!myNeighbours.contains(fullSenderAddress)){
+                        myNeighbours.add(fullSenderAddress);
+                        System.out.println(myName+": "+senderName + " " + fullSenderAddress + " connects.");
+                    }
                     if(myRecentReceived.get(uuid) == null) {
                         myRecentReceived.putIfAbsent(uuid,new Date());
                         //кладем полученное сообщение в очерель сообщений
                         mySender.putMessageToQueue(uuid, "message", messageStrings[3], senderName, fullSenderAddress);
 
                         System.out.println(senderName+": " +messageStrings[3]);
-                        sendConfirmation(uuid, fullSenderAddress);
                     }
+                    sendConfirmation(uuid, fullSenderAddress);
                     break;
                 }
                 case "confirmation":{

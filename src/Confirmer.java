@@ -48,7 +48,7 @@ public class Confirmer extends TimerTask
                     e.printStackTrace();
                 }
             }
-            //если число попыток равно 20, удаляем кто не подтвердил из соседей
+            //если число попыток равно 20, удаляем из соседей тех, кто не подтвердил
             if (entry.getValue().getResendingCounter() == 20)
             {
                 neighbours=entry.getValue().getMyNeighbours();
